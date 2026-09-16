@@ -1,0 +1,80 @@
+# ===== Operating System =====
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===== IDE / Editor =====
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (IntelliJ, PyCharm, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ===== Environment / Secrets =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ===== Logs & Temp =====
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+.cache/
+
+# ===== Dependencies =====
+node_modules/
+vendor/
+bower_components/
+jspm_packages/
+
+# ===== Build Output =====
+dist/
+build/
+out/
+target/
+bin/
+obj/
+*.o
+*.so
+*.dll
+*.exe
+
+# Data folder
+Data/
+
+# ===== Coverage / Testing =====
+coverage/
+.nyc_output/
+*.lcov
