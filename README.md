@@ -822,7 +822,7 @@ Potential next steps include:
 
 **Mahmoud Shoaib**
 
-Computer Science Student | AI Engineer
+**AI Engineer**
 
 GitHub: [@mahmoudshoip94](https://github.com/mahmoudshoip94)
 
