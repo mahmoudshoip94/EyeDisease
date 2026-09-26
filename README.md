@@ -1,72 +1,120 @@
-Eye Disease Classification
-Overview
-This project focuses on multi-class retinal disease classification using deep learning.
+# 🩺 Eye Disease Classification
 
-The main challenge encountered during the project was the highly imbalanced and difficult nature of the dataset. Some classes contained thousands of images, while other diseases had very few samples. This made direct 8-class classification difficult, especially for minority diseases.
+> A deep learning project for multi-class retinal disease classification, developed through multiple experiments to investigate **class imbalance, minority-class recognition, and hierarchical classification strategies**.
 
-The project therefore went through several experiments to investigate different strategies for handling the data imbalance and improving disease classification.
+---
 
-The final approach evolved from direct 8-class classification into a two-stage pipeline:
+## 📌 Project Overview
 
+This project explores the classification of retinal images into multiple eye-disease categories using Deep Learning.
 
-Input Image
-     │
-     ▼
- Model 1
-Normal vs Anomaly
-     │
-     └── Anomaly
+The main challenge was not simply building a classifier — it was dealing with a **highly imbalanced and difficult dataset**, where some classes contained thousands of images while others contained only a few dozen.
+
+Because of this imbalance, a direct 8-class classification approach struggled particularly with minority diseases.
+
+Rather than stopping at the first model, the project evolved through several experiments:
+
+```text
+Direct 8-Class Classification
             │
             ▼
-         Model 2
-     Disease Classification
-Dataset
-The dataset contains 11,839 retinal images collected from multiple sources:
+     Class Weighting
+            │
+            ▼
+   Hierarchical Classification
+            │
+            ▼
+ Normal vs Anomaly + Disease Classification
+```
 
-Source	Images
-ODIR5K	7,000
-APTOS2019	3,484
-ACRIMA	705
-ORIGA	650
-Total	11,839
-The target classes are:
+Each experiment was motivated by limitations observed in the previous one.
 
-Normal
+The final approach became a **two-stage classification pipeline**:
 
-Diabetic Retinopathy
+```text
+                    Input Retinal Image
+                            │
+                            ▼
+                  ┌───────────────────┐
+                  │     Model 1       │
+                  │ Normal / Anomaly  │
+                  └─────────┬─────────┘
+                            │
+                 ┌──────────┴──────────┐
+                 │                     │
+              Normal                Anomaly
+                 │                     │
+                 ▼                     ▼
+              NORMAL          ┌────────────────┐
+                              │    Model 2     │
+                              │ Disease Class  │
+                              └───────┬────────┘
+                                      │
+                                      ▼
+                         ┌─────────────────────────┐
+                         │ DR / Glaucoma /         │
+                         │ Cataract / AMD /        │
+                         │ Hypertension / Myopia  │
+                         └─────────────────────────┘
+```
 
-Glaucoma
+---
 
-Cataract
+# 📊 Dataset
 
-AMD
+The project uses **11,839 retinal images** collected from multiple publicly available datasets.
 
-Hypertension
+| Source    |     Images |
+| --------- | ---------: |
+| ODIR5K    |      7,000 |
+| APTOS2019 |      3,484 |
+| ACRIMA    |        705 |
+| ORIGA     |        650 |
+| **Total** | **11,839** |
 
-Myopia
+### Target Classes
 
-Others
+The original dataset contains 8 classes:
 
-Original Class Distribution
-Class	Images	Percentage
-Normal	4,698	39.68%
-Diabetic Retinopathy	4,113	34.74%
-Others	1,102	9.31%
-Glaucoma	930	7.86%
-Cataract	340	2.87%
-Myopia	294	2.48%
-AMD	274	2.31%
-Hypertension	88	0.74%
-The large difference between the majority and minority classes was the main motivation for experimenting with augmentation, class weighting, and alternative classification strategies.
+* Normal
+* Diabetic Retinopathy
+* Glaucoma
+* Cataract
+* AMD
+* Hypertension
+* Myopia
+* Others
 
-1. Only Augmentation
-Notebook: models.ipynb
+---
 
-The first experiment used the standard 8-class classification setup.
+## ⚠️ Class Imbalance
 
-The model was trained to directly predict one of the eight target classes:
+One of the most important characteristics of the dataset was its severe class imbalance.
 
+| Class                | Images | Percentage |
+| -------------------- | -----: | ---------: |
+| Normal               |  4,698 |     39.68% |
+| Diabetic Retinopathy |  4,113 |     34.74% |
+| Others               |  1,102 |      9.31% |
+| Glaucoma             |    930 |      7.86% |
+| Cataract             |    340 |      2.87% |
+| Myopia               |    294 |      2.48% |
+| AMD                  |    274 |      2.31% |
+| Hypertension         |     88 |      0.74% |
 
+This imbalance became one of the central problems investigated throughout the project.
+
+---
+
+# 🔬 Experiment 1 — Direct 8-Class Classification
+
+### Notebook
+
+`models.ipynb`
+
+The first approach treated the problem as a standard 8-class classification task.
+
+```text
 Input Image
      │
      ▼
@@ -80,431 +128,552 @@ Classification Model
      │
      ▼
 8-Class Prediction
-The main strategy used in this experiment was data augmentation, especially to increase the representation of minority classes.
+```
 
-The augmentation pipeline included:
+### Data Augmentation
 
-Horizontal Flip
+The training pipeline experimented with several augmentation techniques:
 
-Shift / Scale / Rotation
+* Horizontal Flip
+* Shift / Scale / Rotation
+* Brightness / Contrast
+* Blur
+* Gaussian Noise
 
-Brightness / Contrast
+The dataset was divided into:
 
-Blur
+```text
+Train        → 70%
+Validation   → 15%
+Test         → 15%
+```
 
-Gaussian Noise
+Augmentation was applied only to the training set.
 
-The dataset was split into:
+### Results
 
+| Metric          |     Result |
+| --------------- | ---------: |
+| Accuracy        | **62.84%** |
+| Macro Precision | **47.56%** |
+| Macro Recall    | **48.70%** |
+| Macro F1        | **45.67%** |
+| Weighted F1     | **60.06%** |
 
-Train      → 70%
-Validation → 15%
-Test       → 15%
-The augmentation was applied only to the training data.
+### Classification Report
 
-The objective of this experiment was to establish a baseline and investigate how well a direct 8-class classifier could perform after balancing the training data through augmentation.
+| Class                | Precision | Recall |     F1 |
+| -------------------- | --------: | -----: | -----: |
+| AMD                  |    0.2500 | 0.1220 | 0.1639 |
+| Cataract             |    0.4194 | 0.7647 | 0.5417 |
+| Diabetic Retinopathy |    0.6547 | 0.7407 | 0.6951 |
+| Glaucoma             |    0.5902 | 0.5143 | 0.5496 |
+| Hypertension         |    0.4000 | 0.1538 | 0.2222 |
+| Myopia               |    0.6552 | 0.8636 | 0.7451 |
+| Normal               |    0.6631 | 0.7064 | 0.6841 |
+| Others               |    0.1724 | 0.0303 | 0.0515 |
 
-Results
-The model achieved:
+### Confusion Matrices
 
+#### CNN
 
-Accuracy       : 0.6284
-Macro Precision: 0.4756
-Macro Recall   : 0.4870
-Macro F1       : 0.4567
-Weighted F1    : 0.6006
-Classification Report
-Class	Precision	Recall	F1-Score	Support
-AMD	0.2500	0.1220	0.1639	41
-Cataract	0.4194	0.7647	0.5417	51
-Diabetic Retinopathy	0.6547	0.7407	0.6951	617
-Glaucoma	0.5902	0.5143	0.5496	140
-Hypertension	0.4000	0.1538	0.2222	13
-Myopia	0.6552	0.8636	0.7451	44
-Normal	0.6631	0.7064	0.6841	705
-Others	0.1724	0.0303	0.0515	165
-Accuracy			0.6284	1776
-Macro Avg	0.4756	0.4870	0.4567	1776
-Weighted Avg	0.5902	0.6284	0.6006	1776
-Confusion Matrices
-CNN Confusion Matrix:
+![CNN Confusion Matrix](docs/cnn_cm.jpeg)
 
-https://docs/cnn_cm.jpeg
+#### ResNet
 
-ResNet Confusion Matrix:
+![ResNet Confusion Matrix](docs/resnet_cm.jpeg)
 
-https://docs/resnet_cm.jpeg
+### Observation
 
-The confusion matrices demonstrate the difficulty of directly separating all eight classes, particularly the minority classes and the Others class.
+The baseline demonstrated that direct 8-class classification was possible, but minority classes remained difficult to recognize.
 
-2. Class Weights
-Notebook: models_ClassWeights.ipynb
+In particular, **AMD, Hypertension, and Others** showed substantially weaker F1 scores.
 
-After the augmentation-based experiment, the next strategy was to keep the augmentation setup and introduce class weights.
+This motivated the next experiment.
 
-Instead of changing the dataset again, class weights were used to give minority classes a higher contribution to the training loss.
+---
 
-The idea was:
+# ⚖️ Experiment 2 — Class Weights
 
+### Notebook
 
+`models_ClassWeights.ipynb`
+
+The next experiment kept the augmentation strategy and introduced **class-weighted loss**.
+
+The idea was straightforward:
+
+```text
 Majority Classes
-       ↓
-Lower Weight
+       │
+       ▼
+ Lower Training Weight
+
 
 Minority Classes
-       ↓
-Higher Weight
-The training pipeline therefore became:
+       │
+       ▼
+ Higher Training Weight
+```
 
+The goal was to force the model to pay more attention to underrepresented diseases.
 
-Input Image
-     │
-     ▼
-Data Augmentation
-     │
-     ▼
-Class-Weighted Loss
-     │
-     ▼
-Classification Model
-     │
-     ▼
-8-Class Prediction
-The goal was to determine whether class weighting could improve minority-class recognition.
+### Results
 
-Results
-The class-weight experiment produced:
+| Metric          |     Result |
+| --------------- | ---------: |
+| Test Loss       |     4.3096 |
+| Accuracy        | **39.70%** |
+| Macro Precision |      4.96% |
+| Macro Recall    |     12.50% |
+| Macro F1        |  **7.10%** |
+| Weighted F1     |     22.56% |
 
+### Classification Report
 
-Test Loss       : 4.3096
-Test Accuracy   : 0.3970
-Macro Precision : 0.0496
-Macro Recall    : 0.1250
-Macro F1        : 0.0710
-Weighted F1     : 0.2256
-Classification Report
-Class	Precision	Recall	F1-Score	Support
-AMD	0.0000	0.0000	0.0000	41
-Cataract	0.0000	0.0000	0.0000	51
-Diabetic Retinopathy	0.0000	0.0000	0.0000	617
-Glaucoma	0.0000	0.0000	0.0000	140
-Hypertension	0.0000	0.0000	0.0000	13
-Myopia	0.0000	0.0000	0.0000	44
-Normal	0.3970	1.0000	0.5683	705
-Others	0.0000	0.0000	0.0000	165
-Accuracy			0.3970	1776
-Macro Avg	0.0496	0.1250	0.0710	1776
-Weighted Avg	0.1576	0.3970	0.2256	1776
-Confusion Matrix
-https://docs/class_w_cm.png
+| Class                | Precision | Recall |     F1 |
+| -------------------- | --------: | -----: | -----: |
+| AMD                  |    0.0000 | 0.0000 | 0.0000 |
+| Cataract             |    0.0000 | 0.0000 | 0.0000 |
+| Diabetic Retinopathy |    0.0000 | 0.0000 | 0.0000 |
+| Glaucoma             |    0.0000 | 0.0000 | 0.0000 |
+| Hypertension         |    0.0000 | 0.0000 | 0.0000 |
+| Myopia               |    0.0000 | 0.0000 | 0.0000 |
+| Normal               |    0.3970 | 1.0000 | 0.5683 |
+| Others               |    0.0000 | 0.0000 | 0.0000 |
 
-The model effectively collapsed its predictions toward the Normal class, resulting in very poor performance across the remaining classes.
+### Confusion Matrix
 
-This experiment showed that class weighting alone did not provide a reliable solution for the imbalance and classification difficulty in this dataset.
+![Class Weighted Confusion Matrix](docs/class_w_cm.png)
 
-3. Hierarchical Model
-Notebook: models_2Models.ipynb
+### Observation
 
-The next idea was to divide the original 8-class problem into two classification stages.
+The experiment did not improve minority-class recognition.
 
-Instead of asking one model to distinguish all eight diseases directly, the first model grouped the smaller disease classes together.
+Instead, the model effectively collapsed its predictions toward the **Normal** class.
 
-Model 1 — 5 Classes
+This experiment was important because it demonstrated that simply increasing the loss contribution of minority classes was not sufficient for this dataset.
+
+---
+
+# 🧩 Experiment 3 — Hierarchical Classification
+
+### Notebook
+
+`models_2Models.ipynb`
+
+After observing the difficulty of the direct 8-class problem, the classification task was reorganized hierarchically.
+
+Instead of asking one model to distinguish between all 8 classes, the first model grouped the smaller diseases together.
+
+### Model 1 — 5 Classes
+
 The first model classified:
 
-Normal
+* Normal
+* Diabetic Retinopathy
+* Glaucoma
+* Others
+* Minor_Diseases
 
-Diabetic Retinopathy
+Where:
 
-Glaucoma
-
-Others
-
-Minor_Diseases
-
-where:
-
-
+```text
 Minor_Diseases =
     Cataract
     AMD
     Hypertension
     Myopia
-The pipeline was:
+```
 
+The architecture became:
 
-                     Input Image
+```text
+                    Input Image
                          │
                          ▼
-                     Model 1
-                     5 Classes
+                    Model 1
+                    5 Classes
                          │
-         ┌───────────────┼───────────────┬───────────┐
-         │               │               │           │
-       Normal            DR           Glaucoma      Others
-                                                         
-                         Minor_Diseases
-                              │
-                              ▼
-                           Model 2
-                           4 Classes
-                              │
-                    ┌─────────┼─────────┬──────────┐
-                    │         │         │          │
-                 Cataract     AMD   Hypertension  Myopia
-Model 1 Results
-The first model achieved:
+        ┌────────────────┼────────────────┐
+        │                │                │
+      Normal             DR           Glaucoma
+        │                │                │
+        └────────────────┼────────────────┘
+                         │
+                     Others
+                         │
+                  Minor_Diseases
+                         │
+                         ▼
+                    Model 2
+                    4 Classes
+                         │
+             ┌───────────┼───────────┐
+             │           │           │
+          Cataract      AMD     Hypertension
+                                     │
+                                   Myopia
+```
 
+### Model 1 Results
 
-Accuracy        : 0.5450
-Macro Precision : 0.6321
-Macro Recall    : 0.6245
-Macro F1        : 0.5606
-Classification Report
-Class	Precision	Recall	F1-Score	Support
-Normal	0.8920	0.4922	0.6344	705
-Diabetic Retinopathy	0.9040	0.4733	0.6213	617
-Glaucoma	0.6078	0.6643	0.6348	140
-Others	0.1887	0.8485	0.3087	165
-Minor_Diseases	0.5680	0.6443	0.6038	149
-Accuracy			0.5450	1776
-Macro Avg	0.6321	0.6245	0.5606	1776
-Weighted Avg	0.7813	0.5450	0.5970	1776
-Confusion Matrix
-https://docs/model1_hir_cm.png
+| Metric          |     Result |
+| --------------- | ---------: |
+| Accuracy        | **54.50%** |
+| Macro Precision | **63.21%** |
+| Macro Recall    | **62.45%** |
+| Macro F1        | **56.06%** |
 
-Why the Hierarchical Approach Was Not Completed
-The second stage of the hierarchical approach, which was supposed to classify the Minor_Diseases, did not train successfully.
+| Class                | Precision | Recall |     F1 |
+| -------------------- | --------: | -----: | -----: |
+| Normal               |    0.8920 | 0.4922 | 0.6344 |
+| Diabetic Retinopathy |    0.9040 | 0.4733 | 0.6213 |
+| Glaucoma             |    0.6078 | 0.6643 | 0.6348 |
+| Others               |    0.1887 | 0.8485 | 0.3087 |
+| Minor_Diseases       |    0.5680 | 0.6443 | 0.6038 |
+
+### Confusion Matrix
+
+![Hierarchical Model 1 Confusion Matrix](docs/model1_hir_cm.png)
+
+### Why This Experiment Was Not Completed
+
+The second-stage model was intended to classify the `Minor_Diseases` group into:
+
+```text
+Cataract
+AMD
+Hypertension
+Myopia
+```
+
+However, the second-stage training did not complete successfully.
 
 The validation loss became:
 
-
+```text
 val_loss = NaN
-This made the second-stage model unreliable and prevented the complete hierarchical pipeline from being used as the final solution.
+```
 
-Therefore, this approach was treated as an unsuccessful experiment rather than the final model.
+Therefore, the complete hierarchical pipeline could not be used as the final solution.
 
-4. Binary + Multi-Class Classification
-After the previous experiments, the problem was reformulated into a two-stage classification pipeline.
+### Important
 
-Instead of trying to classify all eight classes directly, the system first determines whether the eye is normal or abnormal.
+This experiment was **not discarded from the project history**.
 
-Then, if the eye is abnormal, a second model determines the specific disease.
+It became an important step in understanding how the dataset behaved and why the classification problem needed to be reformulated.
 
+---
 
-                     Input Image
-                         │
-                         ▼
-                 ┌─────────────────┐
-                 │     Model 1     │
-                 │ Normal/Anomaly  │
-                 └────────┬────────┘
-                          │
-                 ┌────────┴────────┐
-                 │                 │
-               Normal           Anomaly
-                 │                 │
-                 ▼                 ▼
-              NORMAL        ┌───────────────┐
-                            │    Model 2    │
-                            │ Disease Class │
-                            └───────┬───────┘
-                                    │
-                                    ▼
-                         Disease Classification
-Model 1 — Normal vs Anomaly
-Notebook: new_models_1.ipynb
+# 🔀 Experiment 4 — Binary + Multi-Class Classification
+
+### Notebooks
+
+* `new_models_1.ipynb`
+* `new_models_2.ipynb`
+
+After the previous experiments, the problem was reformulated into two more focused stages.
+
+Instead of directly predicting one of eight classes:
+
+```text
+8-Class Classification
+```
+
+the system first asks:
+
+```text
+Is the eye Normal or Anomalous?
+```
+
+and only then performs disease classification.
+
+---
+
+# 🥇 Model 1 — Normal vs Anomaly
 
 The first model performs binary classification:
 
-
+```text
 Normal
    vs
 Anomaly
-where Anomaly represents all non-normal cases.
+```
 
 The anomaly group contains:
 
-Diabetic Retinopathy
+* Diabetic Retinopathy
+* Glaucoma
+* Cataract
+* AMD
+* Hypertension
+* Myopia
+* Others
 
-Glaucoma
+### Results
 
-Cataract
+| Metric            |     Result |
+| ----------------- | ---------: |
+| Accuracy          | **72.41%** |
+| Anomaly Precision | **69.64%** |
+| Anomaly Recall    | **96.17%** |
+| Anomaly F1        | **80.78%** |
+| Macro Precision   | **77.92%** |
+| Macro Recall      | **66.24%** |
+| Macro F1          | **65.94%** |
+| Weighted F1       | **69.00%** |
 
-AMD
+### Classification Report
 
-Hypertension
+| Class   | Precision | Recall |     F1 |
+| ------- | --------: | -----: | -----: |
+| Normal  |    0.8620 | 0.3631 | 0.5110 |
+| Anomaly |    0.6964 | 0.9617 | 0.8078 |
 
-Myopia
+### Accuracy
 
-Others
+![Model 1 Accuracy](docs/model1_acc.jpeg)
 
-Results
+### Confusion Matrix
 
-Accuracy          : 0.7241
+![Model 1 Confusion Matrix](docs/model1_cm.jpeg)
 
-Anomaly Precision : 0.6964
-Anomaly Recall    : 0.9617
-Anomaly F1        : 0.8078
+### Role in the Final Pipeline
 
-Macro Precision   : 0.7792
-Macro Recall      : 0.6624
-Macro F1          : 0.6594
+This model acts as the **screening stage**.
 
-Weighted Precision: 0.7621
-Weighted Recall   : 0.7241
-Weighted F1       : 0.6900
-Classification Report
-Class	Precision	Recall	F1-Score	Support
-Normal	0.8620	0.3631	0.5110	705
-Anomaly	0.6964	0.9617	0.8078	1071
-Accuracy			0.7241	1776
-Macro Avg	0.7792	0.6624	0.6594	1776
-Weighted Avg	0.7621	0.7241	0.6900	1776
-Accuracy
-https://docs/model1_acc.jpeg
+Its main purpose is to determine whether the input belongs to the Normal group or should be passed to the disease classifier.
 
-Confusion Matrix
-https://docs/model1_cm.jpeg
+---
 
-This model was used as the first screening stage of the final pipeline.
+# 🧬 Model 2 — Disease Classification
 
-Model 2 — Disease Classification
-Notebook: new_models_2.ipynb
+### Notebook
 
-The second model receives the abnormal/diseased cases and performs multi-class disease classification.
+`new_models_2.ipynb`
 
-For this stage, the Normal and Others classes were removed.
+The second model receives the disease/anomaly cases and focuses specifically on named diseases.
 
-The model therefore focuses on distinguishing between the actual named diseases:
+For this stage, the `Normal` and `Others` classes were removed.
 
-Diabetic Retinopathy
+The model therefore focuses on:
 
-Glaucoma
+* Diabetic Retinopathy
+* Glaucoma
+* Cataract
+* AMD
+* Hypertension
+* Myopia
 
-Cataract
+### Dataset Distribution
 
-AMD
+![Disease Class Distribution](docs/class_distribution.png)
 
-Hypertension
+### Results
 
-Myopia
+| Metric          |     Result |
+| --------------- | ---------: |
+| Accuracy        | **75.00%** |
+| Macro Precision | **56.00%** |
+| Macro Recall    | **70.00%** |
+| Macro F1        | **60.00%** |
+| Weighted F1     | **78.00%** |
 
-The resulting dataset distribution is shown below.
+### Classification Report
 
-This visualization shows the distribution of the remaining disease classes across the training, validation, and test sets after removing Normal and Others.
+| Class                | Precision | Recall |   F1 |
+| -------------------- | --------: | -----: | ---: |
+| Diabetic Retinopathy |      0.94 |   0.74 | 0.83 |
+| Glaucoma             |      0.71 |   0.81 | 0.76 |
+| Cataract             |      0.62 |   0.84 | 0.72 |
+| AMD                  |      0.24 |   0.56 | 0.34 |
+| Hypertension         |      0.10 |   0.31 | 0.15 |
+| Myopia               |      0.73 |   0.91 | 0.81 |
 
-https://docs/class_distribution.png
+### Accuracy
 
-Results
-The second model achieved:
+![Model 2 Accuracy](docs/models2_acc.jpeg)
 
+### Confusion Matrix
 
-Accuracy        : 0.75
-Macro Precision : 0.56
-Macro Recall    : 0.70
-Macro F1        : 0.60
-Weighted F1     : 0.78
-Classification Report
-Class	Precision	Recall	F1-Score	Support
-Diabetic Retinopathy	0.94	0.74	0.83	617
-Glaucoma	0.71	0.81	0.76	140
-Cataract	0.62	0.84	0.72	51
-AMD	0.24	0.56	0.34	41
-Hypertension	0.10	0.31	0.15	13
-Myopia	0.73	0.91	0.81	44
-Accuracy			0.75	906
-Macro Avg	0.56	0.70	0.60	906
-Weighted Avg	0.83	0.75	0.78	906
-Accuracy
-https://docs/models2_acc.jpeg
+![Model 2 Confusion Matrix](docs/model2_cm.jpeg)
 
-Confusion Matrix
-https://docs/model2_cm.jpeg
+### Observation
 
-The model performed particularly well on:
+The model showed stronger performance on several relatively better-represented disease classes, while very small classes — particularly **Hypertension and AMD** — remained challenging.
 
-Diabetic Retinopathy
+This behavior is consistent with the severe class imbalance observed earlier in the project.
 
-Glaucoma
+---
 
-Cataract
+# 🏗️ Final Architecture
 
-Myopia
+The final system combines both models into one inference pipeline:
 
-while the very small classes, especially Hypertension and AMD, remained more difficult.
+```text
+                         Input Image
+                              │
+                              ▼
+                  ┌─────────────────────┐
+                  │       Model 1       │
+                  │   Normal / Anomaly  │
+                  └──────────┬──────────┘
+                             │
+                 ┌───────────┴───────────┐
+                 │                       │
+                 ▼                       ▼
+              Normal                  Anomaly
+                 │                       │
+                 ▼                       ▼
+              NORMAL              ┌──────────────┐
+                                  │   Model 2    │
+                                  │    Disease   │
+                                  │ Classification│
+                                  └──────┬───────┘
+                                         │
+                ┌────────────┬───────────┼───────────┬────────────┐
+                ▼            ▼           ▼           ▼            ▼
+               DR        Glaucoma     Cataract      AMD     Hypertension
+                                                                    │
+                                                                    ▼
+                                                                  Myopia
+```
 
-Final Pipeline
-The final system combines the two models into a single inference pipeline.
+### Decision Process
 
+**Step 1 — Screening**
 
-                         ┌─────────────────┐
-                         │   Input Image   │
-                         └────────┬────────┘
-                                  │
-                                  ▼
-                         ┌─────────────────┐
-                         │     Model 1     │
-                         │ Normal/Anomaly  │
-                         └────────┬────────┘
-                                  │
-                     ┌────────────┴────────────┐
-                     │                         │
-                     ▼                         ▼
-                  Normal                    Anomaly
-                     │                         │
-                     ▼                         ▼
-                  NORMAL                  ┌─────────┐
-                                          │ Model 2 │
-                                          └────┬────┘
-                                               │
-                                               ▼
-                                      Disease Classification
-                                               │
-                          ┌────────────┬────────┼────────┬───────────┐
-                          │            │        │        │           │
-                          ▼            ▼        ▼        ▼           ▼
-                         DR        Glaucoma  Cataract   AMD    Hypertension
-                                                                          │
-                                                                          ▼
-                                                                       Myopia
-The final decision process is therefore:
-
-
-Step 1:
+```text
 Is the eye Normal or Anomaly?
+```
 
-        ↓
+If:
 
-If Normal:
-    → Normal
+```text
+Normal
+   ↓
+Normal
+```
 
-If Anomaly:
-    → Send image to Model 2
+If:
 
-        ↓
+```text
+Anomaly
+   ↓
+Send image to Model 2
+```
 
-Step 2:
-Which disease?
+---
 
-    → Diabetic Retinopathy
-    → Glaucoma
-    → Cataract
-    → AMD
-    → Hypertension
-    → Myopia
-Note: Model 1 and Model 2 were evaluated as separate stages. The reported 72.41% and 75.00% accuracies are stage-level metrics, not an end-to-end 8-class accuracy.
+**Step 2 — Disease Classification**
 
-This approach reduces the initial classification problem from an 8-class decision into two more focused decisions:
+Model 2 predicts one of:
 
+```text
+Diabetic Retinopathy
+Glaucoma
+Cataract
+AMD
+Hypertension
+Myopia
+```
 
-Stage 1:
+---
+
+# 📈 Experiment Comparison
+
+| Experiment   | Strategy                                | Main Result                                            |
+| ------------ | --------------------------------------- | ------------------------------------------------------ |
+| Experiment 1 | Direct 8-Class + Augmentation           | Accuracy: **62.84%** / Macro F1: **45.67%**            |
+| Experiment 2 | Augmentation + Class Weights            | Accuracy: **39.70%** / Macro F1: **7.10%**             |
+| Experiment 3 | Hierarchical Classification             | Model 1 Accuracy: **54.50%** / Stage 2 failed with NaN |
+| Experiment 4 | Normal/Anomaly → Disease Classification | Model 1: **72.41%** / Model 2: **75.00%**              |
+
+> **Important:** The reported 72.41% and 75.00% accuracies are stage-level metrics. They are **not an end-to-end 8-class accuracy**.
+
+---
+
+# 🧠 What This Project Demonstrates
+
+This project was not built around a single training run.
+
+The development process involved repeatedly identifying a limitation, formulating a new strategy, training it, evaluating the results, and using those results to determine the next direction.
+
+The main lessons from the experiments were:
+
+### 1. Accuracy alone was not enough
+
+Because of the severe class imbalance, overall accuracy could hide poor performance on minority diseases.
+
+For this reason, the project also tracked:
+
+* Precision
+* Recall
+* F1-score
+* Macro averages
+* Weighted averages
+* Confusion matrices
+
+---
+
+### 2. Data imbalance significantly affected minority classes
+
+The original dataset contained:
+
+```text
+Normal             → 39.68%
+Diabetic Retinopathy → 34.74%
+Hypertension       → 0.74%
+```
+
+This difference strongly affected the ability to recognize smaller classes.
+
+---
+
+### 3. Class weighting was not a universal solution
+
+Although class weights were introduced specifically to address imbalance, the resulting experiment performed substantially worse.
+
+This demonstrated that increasing minority-class loss weights alone was not enough to solve the underlying classification difficulty.
+
+---
+
+### 4. Reformulating the problem changed the learning task
+
+The final approach transformed:
+
+```text
+One difficult 8-class decision
+```
+
+into:
+
+```text
+Stage 1
 Normal vs Anomaly
 
-Stage 2:
-Disease vs Disease
-Project Structure
+        +
 
+Stage 2
+Disease vs Disease
+```
+
+This allowed each model to focus on a more specific classification problem.
+
+---
+
+### 5. Failed experiments were part of the development process
+
+The hierarchical model was not able to complete its second stage because the validation loss became `NaN`.
+
+Instead of hiding this experiment, it is documented because it explains **why the project moved toward a different architecture**.
+
+---
+
+# 🗂️ Project Structure
+
+```text
 EyeDisease/
 │
 ├── Data/
@@ -533,28 +702,134 @@ EyeDisease/
 ├── .gitignore
 ├── README.md
 └── requirements.txt
-Experiment Summary
-Experiment	Strategy	Main Result
-Only Augmentation	Direct 8-class classification	Accuracy: 62.84%, Macro F1: 45.67%
-Class Weights	Augmentation + class-weighted loss	Accuracy: 39.70%, Macro F1: 7.10%
-Hierarchical Model	5-class Model 1 + minority Model 2	Model 1 Accuracy: 54.50%, second stage failed with NaN validation loss
-Binary + Multi-Class	Normal/Anomaly → Disease classification	Model 1 Accuracy: 72.41%, Model 2 Accuracy: 75.00%
-Conclusion
-The experiments showed that the main difficulty was strongly related to the structure and imbalance of the dataset.
+```
 
-The direct 8-class approach using augmentation provided a useful baseline, but minority classes remained difficult to classify.
+---
 
-Adding class weights alone did not solve the problem and resulted in a significant drop in performance.
+# 🛠️ Technologies
 
-A hierarchical approach was then investigated by grouping minority diseases together, but the second-stage model failed to train properly because its validation loss became NaN.
+* Python
+* TensorFlow
+* Keras
+* NumPy
+* Pandas
+* Scikit-learn
+* OpenCV
+* Matplotlib
 
-The final strategy reformulated the task into two stages:
+---
 
-tex
+# 📚 Project Workflow
+
+The overall development process can be summarized as:
+
+```text
+Dataset
+   │
+   ▼
+Exploratory Data Analysis
+   │
+   ▼
+Identify Class Imbalance
+   │
+   ▼
+Data Splitting
+   │
+   ▼
+8-Class Baseline
+   │
+   ▼
+Augmentation
+   │
+   ▼
+Class Weight Experiment
+   │
+   ▼
+Hierarchical Classification
+   │
+   ▼
+Analyze Failure
+   │
+   ▼
+Problem Reformulation
+   │
+   ▼
 Normal vs Anomaly
-        ↓
+   │
+   ▼
 Disease Classification
-This produced a more focused classification pipeline, with the first model handling the normal/abnormal decision and the second model specializing in distinguishing between diseases.
+   │
+   ▼
+Final Two-Stage Pipeline
+```
 
-The final architecture therefore reflects an iterative approach where each experiment was motivated by a limitation observed in the previous one.
+---
 
+# 📝 Conclusion
+
+The main challenge of this project was not simply achieving a high classification accuracy.
+
+The challenge was understanding **why the models struggled**, especially with minority diseases, and iteratively redesigning the problem around those limitations.
+
+The experiments progressed from:
+
+```text
+Direct 8-Class Classification
+```
+
+to:
+
+```text
+Class-Weighted Classification
+```
+
+then:
+
+```text
+Hierarchical Classification
+```
+
+and finally:
+
+```text
+Normal vs Anomaly
+          ↓
+Disease Classification
+```
+
+The final system therefore represents an **iterative experimental process**, where unsuccessful experiments were used to understand the dataset and guide the next modeling decision.
+
+> **The project is intentionally documented as an experimental journey rather than only presenting the final model, because the failures, comparisons, and architectural changes are an important part of the work.**
+
+---
+
+## 🚀 Future Improvements
+
+Potential next steps include:
+
+* Improving minority-class representation
+* Further investigating AMD and Hypertension
+* Experimenting with transfer learning and fine-tuning
+* Exploring stronger augmentation strategies
+* Improving end-to-end evaluation of the two-stage pipeline
+* Investigating confidence thresholds between Model 1 and Model 2
+* Adding an inference/demo interface
+* Tracking experiment configurations and results more systematically
+
+---
+
+## 👤 Author
+
+**Mahmoud Shoaib**
+
+Computer Science Student | AI Engineer
+
+GitHub: [@mahmoudshoip94](https://github.com/mahmoudshoip94)
+
+---
+
+## ⭐ Project Philosophy
+
+> **Build → Evaluate → Understand → Experiment → Improve**
+
+This repository documents that process.
