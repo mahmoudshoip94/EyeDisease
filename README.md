@@ -147,11 +147,11 @@ Weighted F1    : 0.6006
 
 ### CNN
 
-![CNN Confusion Matrix](docs/cnn_cm.png)
+![CNN Confusion Matrix](docs/cnn_cm.jpeg)
 
 ### ResNet
 
-![ResNet Confusion Matrix](docs/resnet_cm.png)
+![ResNet Confusion Matrix](docs/resnet_cm.jpeg)
 
 The confusion matrices demonstrate the difficulty of directly separating all eight classes, particularly the minority classes and the `Others` class.
 
@@ -435,11 +435,11 @@ Weighted F1       : 0.6900
 
 ### Accuracy
 
-![Model 1 Accuracy](docs/model1_acc.png)
+![Model 1 Accuracy](docs/model1_acc.jpeg)
 
 ### Confusion Matrix
 
-![Model 1 Confusion Matrix](docs/model1_cm.png)
+![Model 1 Confusion Matrix](docs/model1_cm.jpeg)
 
 This model was used as the first screening stage of the final pipeline.
 
@@ -510,11 +510,11 @@ while the very small classes, especially `Hypertension` and `AMD`, remained more
 
 ### Accuracy
 
-![Model 2 Accuracy](docs/models2_acc.png)
+![Model 2 Accuracy](docs/models2_acc.jpeg)
 
 ### Confusion Matrix
 
-![Model 2 Confusion Matrix](docs/model2_cm.png)
+![Model 2 Confusion Matrix](docs/model2_cm.jpeg)
 
 ---
 
@@ -610,13 +610,13 @@ EyeDisease/
 │       └── test/
 │
 ├── docs/
-│   ├── cnn_cm.png
-│   ├── model1_acc.png
-│   ├── model1_cm.png
+│   ├── cnn_cm.jpeg
+│   ├── model1_acc.jpeg
+│   ├── model1_cm.jpeg
 │   ├── model1_hir_cm.png
-│   ├── model2_cm.png
-│   ├── models2_acc.png
-│   ├── resnet_cm.png
+│   ├── model2_cm.jpeg
+│   ├── models2_acc.jpeg
+│   ├── resnet_cm.jpeg
 │   ├── class_distribution.png
 │   └── class_w_cm.png
 │
